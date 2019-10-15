@@ -8,9 +8,6 @@ readonly ROOTDIR="$(cd "${PROGDIR}/.." && pwd)"
 # shellcheck source=./.util/git.sh
 source "${PROGDIR}/.util/git.sh"
 
-# shellcheck source=./.util/images.sh
-source "${PROGDIR}/.util/images.sh"
-
 # shellcheck source=./.util/tools.sh
 source "${PROGDIR}/.util/tools.sh"
 
@@ -24,8 +21,6 @@ OPTIONS
   --help                 prints the command usage
   --language <language>  specifies the language family to test (nodejs)
   --buildpack <path>     specifies a path to the buildpack under test (eg. nodejs-cnb)
-  --build-image <image>  specified an image to use for the build phase (default: cloudfoundry/build:full-cnb)
-  --run-image <image>    specified an image to use for the run phase (default: cloudfoundry/run:full-cnb)
   --cached               runs test suite with the --cached option enabled
   --debug                enables debug logging
 
@@ -33,11 +28,9 @@ USAGE
 }
 
 function main() {
-    local language buildpack debug build_image run_image pack_version cached
+    local language buildpack debug pack_version cached
       cached="false"
       debug="false"
-      build_image="cloudfoundry/build:full-cnb"
-      run_image="cloudfoundry/run:full-cnb"
       pack_version="latest"
 
     while [[ "${#}" != 0 ]]; do
@@ -54,16 +47,6 @@ function main() {
 
         --buildpack)
           buildpack="$(cd "${2}" && pwd)"
-          shift 2
-          ;;
-
-        --build-image)
-          build_image="${2}"
-          shift 2
-          ;;
-
-        --run-image)
-          run_image="${2}"
           shift 2
           ;;
 
@@ -103,8 +86,6 @@ function main() {
     util::print::title "Running Integration Test Suite"
     util::print::info "  language:     ${language}"
     util::print::info "  buildpack:    ${buildpack}"
-    util::print::info "  build-image:  ${build_image}"
-    util::print::info "  run-image:    ${run_image}"
     util::print::info "  pack-version: ${pack_version}"
     util::print::info "  cached:       ${cached}"
     util::print::info "  debug:        ${debug}"
@@ -115,8 +96,6 @@ function main() {
 
     GIT_TOKEN="$(util::git::token::fetch)"
     export GIT_TOKEN
-
-    util::images::pull "${build_image}" "${run_image}"
 
     util::tools::install \
       --directory "${ROOTDIR}/.bin" \
