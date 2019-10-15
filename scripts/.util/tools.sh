@@ -113,9 +113,8 @@ function util::tools::packager::install () {
     local dir
     dir="${1}"
 
-    util::print::title "Installing packager"
-
     if [[ ! -f "${dir}/packager" ]]; then
+        util::print::title "Installing packager"
         go build -o "${dir}/packager" github.com/cloudfoundry/libcfbuildpack/packager
     fi
 }
@@ -124,5 +123,8 @@ function util::tools::cnb2cf::install() {
     local dir
     dir="${1}"
 
-    go build -o "${dir}/cnb2cf" github.com/cloudfoundry/cnb2cf
+    if [[ ! -f "${dir}/cnb2cf" ]]; then
+        util::print::title "Installing cnb2cf"
+        go build -o "${dir}/cnb2cf" github.com/cloudfoundry/cnb2cf
+    fi
 }
