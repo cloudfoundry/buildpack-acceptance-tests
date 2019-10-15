@@ -18,7 +18,8 @@ export CF_STACK=${CF_STACK:-"cflinuxfs3"}
 
 function usage() {
   cat <<-USAGE
-${PROGDIR}/integration.sh [OPTIONS]
+integration.sh --language <language> --buildpack <path> [OPTIONS]
+
 OPTIONS
   --help                 prints the command usage
   --language <language>  specifies the language family to test (nodejs)
@@ -78,6 +79,10 @@ function main() {
 
         --debug)
           debug="true"
+          shift 1
+          ;;
+
+        "")
           shift 1
           ;;
 
@@ -151,9 +156,8 @@ function error() {
   local message
   message="${1}"
 
-  echo "${message}"
   usage
-  exit 1
+  util::print::error "${message}"
 }
 
 main "${@:-}"
