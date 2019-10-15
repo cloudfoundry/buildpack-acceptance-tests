@@ -88,15 +88,11 @@ function main() {
     done
 
     if [[ -z "${language}" ]]; then
-      echo "--language is a required flag"
-      usage
-      exit 1
+      error "--language is a required flag"
     fi
 
     if [[ -z "${language}" ]]; then
-      echo "--buildpack is a required flag"
-      usage
-      exit 1
+      error "--buildpack is a required flag"
     fi
 
     util::print::title "Running Integration Test Suite"
@@ -149,6 +145,15 @@ function integration::run() {
   else
     util::print::success "** GO Test Succeeded **"
   fi
+}
+
+function error() {
+  local message
+  message="${1}"
+
+  echo "${message}"
+  usage
+  exit 1
 }
 
 main "${@:-}"
