@@ -1,7 +1,6 @@
 package integration_test
 
 import (
-	"encoding/json"
 	"flag"
 	"os"
 	"os/exec"
@@ -16,14 +15,13 @@ import (
 )
 
 var (
-	bpDir             string
 	testdata          string
-	buildpackVersion  string
 	packagedBuildpack cutlass.VersionedBuildpackPackage
 )
 
 func init() {
-	flag.StringVar(&buildpackVersion, "version", "", "version to use (builds if empty)")
+	flag.StringVar(&packagedBuildpack.File, "buildpack", "", "path to a packaged buildpack")
+	flag.StringVar(&packagedBuildpack.Version, "buildpack-version", "", "version of the packaged buildpack")
 	flag.BoolVar(&cutlass.Cached, "cutlass.cached", true, "cached buildpack")
 	flag.StringVar(&cutlass.DefaultMemory, "memory", "128M", "default memory for pushed apps")
 	flag.StringVar(&cutlass.DefaultDisk, "disk", "256M", "default disk for pushed apps")
@@ -35,56 +33,31 @@ func TestIntegration(t *testing.T) {
 	RunSpecs(t, "Integration Suite")
 }
 
-var _ = SynchronizedBeforeSuite(func() []byte {
+var _ = BeforeSuite(func() {
 	currentDir, err := os.Getwd()
 	Expect(err).NotTo(HaveOccurred())
 
 	testdata = filepath.Join(currentDir, "testdata")
-	bpDir = os.Getenv("BUILDPACK_DIR")
-	if bpDir == "" {
-		Fail("setting $BUILDPACK_DIR is required")
-	}
-	// Run once
-	if buildpackVersion == "" {
-		Expect(os.Chdir(bpDir)).To(Succeed())
-
-		packagedBuildpack, err := cutlass.PackageShimmedBuildpack(bpDir, os.Getenv("CF_STACK"))
-		Expect(err).NotTo(HaveOccurred(), "failed to package buildpack")
-
-		Expect(os.Chdir(currentDir)).To(Succeed())
-
-		data, err := json.Marshal(packagedBuildpack)
-		Expect(err).NotTo(HaveOccurred())
-		return data
-	}
-
-	return nil
-}, func(data []byte) {
-	// Run on all nodes
-	var err error
-	if len(data) > 0 {
-		err = json.Unmarshal(data, &packagedBuildpack)
-		Expect(err).NotTo(HaveOccurred())
-		buildpackVersion = packagedBuildpack.Version
-	}
 
 	Expect(cutlass.CopyCfHome()).To(Succeed())
 	cutlass.SeedRandom()
 	cutlass.DefaultStdoutStderr = GinkgoWriter
+
+	err = cutlass.CreateOrUpdateBuildpack("nodejs", packagedBuildpack.File, os.Getenv("CF_STACK"))
+	Expect(err).NotTo(HaveOccurred())
 })
 
 var _ = SynchronizedAfterSuite(func() {
 	// Run on all nodes
 }, func() {
 	// Run once
-	Expect(cutlass.RemovePackagedBuildpack(packagedBuildpack)).To(Succeed())
 	Expect(cutlass.DeleteOrphanedRoutes()).To(Succeed())
 })
 
 func PushAppAndConfirm(app *cutlass.App) {
 	Expect(app.Push()).To(Succeed())
 	Eventually(func() ([]string, error) { return app.InstanceStates() }, 60*time.Second).Should(Equal([]string{"RUNNING"}))
-	Expect(app.ConfirmBuildpack(buildpackVersion)).To(Succeed())
+	Expect(app.ConfirmBuildpack(packagedBuildpack.Version)).To(Succeed())
 }
 
 func DestroyApp(app *cutlass.App) *cutlass.App {
@@ -127,13 +100,7 @@ func AssertUsesProxyDuringStagingIfPresent(fixturePath string) {
 		})
 
 		It("uses a proxy during staging if present", func() {
-			bpFile := filepath.Join(bpDir, buildpackVersion+cutlass.RandStringRunes(6)+"tmp")
-			cmd := exec.Command("cp", packagedBuildpack.File, bpFile)
-			err := cmd.Run()
-			Expect(err).To(BeNil())
-			defer os.Remove(bpFile)
-
-			Expect(cutlass.EnsureUsesProxy(fixturePath, bpFile)).To(Succeed())
+			Expect(cutlass.EnsureUsesProxy(fixturePath, packagedBuildpack.File)).To(Succeed())
 		})
 	})
 }
@@ -143,19 +110,7 @@ func AssertNoInternetTraffic(fixturePath string) {
 		Skip("Running uncached tests")
 	}
 
-	randPostFix := cutlass.RandStringRunes(8)
-	bpFile := filepath.Join(bpDir, buildpackVersion+"tmp"+randPostFix)
-	cmd := exec.Command("cp", packagedBuildpack.File, bpFile)
-	err := cmd.Run()
-	Expect(err).To(BeNil())
-	defer os.Remove(bpFile)
-
-	traffic, built, _, err := cutlass.InternetTraffic(
-		bpDir,
-		fixturePath,
-		bpFile,
-		[]string{},
-	)
+	traffic, built, _, err := cutlass.InternetTraffic(fixturePath, packagedBuildpack.File, []string{})
 	Expect(err).To(BeNil())
 	Expect(built).To(BeTrue())
 	Expect(traffic).To(BeEmpty())

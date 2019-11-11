@@ -77,7 +77,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 				Expect(app.Push()).ToNot(BeNil())
 
 				Eventually(app.Stdout.ANSIStrippedString, 2*time.Second).Should(ContainSubstring("no valid dependencies for node, 9000.0.0"))
-				Expect(app.ConfirmBuildpack(buildpackVersion)).To(Succeed())
+				Expect(app.ConfirmBuildpack(packagedBuildpack.Version)).To(Succeed())
 			})
 		})
 
@@ -90,7 +90,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 				Expect(app.Push()).ToNot(BeNil())
 
 				Eventually(app.Stdout.ANSIStrippedString, 2*time.Second).Should(ContainSubstring("no valid dependencies for node, 4.1.1"))
-				Expect(app.ConfirmBuildpack(buildpackVersion)).To(Succeed())
+				Expect(app.ConfirmBuildpack(packagedBuildpack.Version)).To(Succeed())
 			})
 		})
 	})
@@ -360,35 +360,6 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 					}
 				}
 			}
-		})
-	})
-
-	Describe("Unbuilt buildpack (eg github)", func() {
-		// only run if using uncached buildpack
-		var bpName string
-		BeforeEach(func() {
-			if cutlass.Cached {
-				Skip("unbuilt requires uncached buildpack")
-			}
-			app = cutlass.New(filepath.Join(testdata, "simple_app"))
-			bpName = fmt.Sprintf("unbuilt-nodejs-%s", cutlass.RandStringRunes(8))
-			app.Buildpacks = []string{bpName + "_buildpack"}
-			cmd := exec.Command("git", "archive", "-o", filepath.Join("/tmp", bpName+".zip"), "HEAD")
-
-			cmd.Dir = bpDir
-			Expect(cmd.Run()).To(Succeed())
-			Expect(cutlass.CreateOrUpdateBuildpack(bpName, filepath.Join("/tmp", bpName+".zip"), "")).To(Succeed())
-			Expect(os.Remove(filepath.Join("/tmp", bpName+".zip"))).To(Succeed())
-		})
-		AfterEach(func() {
-			Expect(cutlass.DeleteBuildpack(bpName)).To(Succeed())
-		})
-
-		It("runs", func() {
-			Expect(app.Push()).To(Succeed())
-
-			Expect(app.Stdout.String()).To(ContainSubstring("Installing node"))
-			Expect(app.GetBody("/")).To(ContainSubstring("NodeOptions: "))
 		})
 	})
 
