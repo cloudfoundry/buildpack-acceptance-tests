@@ -139,7 +139,7 @@ function main() {
       local tmpdir
       tmpdir="$(mktemp -d)"
 
-      cp -r "${buildpack_input}" "${tmpdir}"
+      cp -r "${buildpack_input}/" "${tmpdir}"
       buildpack="$(set -e; integration::package "$(cd "${tmpdir}" && pwd)" "${buildpack_version}" "${stack}")"
     fi
 
@@ -201,7 +201,7 @@ function integration::package() {
 
   mv ${dir}/*.zip "${zip_dir}/"
 
-  printf "%s" "$(ls ${zip_dir}/*.zip)"
+  printf "%s" "$(ls -t ${zip_dir}/*.zip | head -1)"
 }
 
 function error() {
