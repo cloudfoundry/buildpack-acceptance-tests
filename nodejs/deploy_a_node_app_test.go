@@ -137,7 +137,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 			It("deploys", func() {
 				app = cutlass.New(filepath.Join(testdata, "vendored_dependencies"))
 				PushAppAndConfirm(app)
-				Expect(app.Stdout.ANSIStrippedString()).To(ContainSubstring("Rebuilding node_modules"))
+				Expect(app.Stdout.ANSIStrippedString()).To(ContainSubstring("running npm rebuild"))
 
 				By("does not output protip that recommends user vendors dependencies", func() {
 					Expect(app.Stdout.ANSIStrippedString()).ToNot(MatchRegexp("It is recommended to vendor the application's Node.js dependencies"))
@@ -237,7 +237,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 
 				Expect(filepath.Join(app.Path, "node_modules")).ToNot(BeADirectory())
 
-				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Installing node_modules"))
+				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("running npm install"))
 				Expect(app.GetBody("/")).To(ContainSubstring("Hello, World!"))
 
 				By("outputs protip that recommends user vendors dependencies", func() {
