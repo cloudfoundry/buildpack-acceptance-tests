@@ -32,7 +32,7 @@ function util::print::error() {
 function util::print::success() {
   local message green reset
   message="${1}"
-  red="\033[0;32m"
+  green="\033[0;32m"
   reset="\033[0;39m"
 
   echo -e "${green}${message}${reset}" >&2
