@@ -245,8 +245,11 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 				})
 			})
 
-			AssertUsesProxyDuringStagingIfPresent(filepath.Join(testdata, "no_vendored_dependencies"))
+			It("uses a proxy during staging", func() {
+				AssertUsesProxyDuringStagingIfPresent(filepath.Join(testdata, "no_vendored_dependencies"))
+			})
 		})
+
 		Context("with an app with a yarn.lock file", func() {
 			BeforeEach(func() {
 				app = cutlass.New(filepath.Join(testdata, "with_yarn"))
@@ -262,7 +265,9 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 				Expect(app.GetBody("/")).To(ContainSubstring("Hello, World!"))
 			})
 
-			AssertUsesProxyDuringStagingIfPresent(filepath.Join(testdata, "with_yarn"))
+			It("uses a proxy during staging", func() {
+				AssertUsesProxyDuringStagingIfPresent(filepath.Join(testdata, "with_yarn"))
+			})
 		})
 		Context("with an app with an out of date yarn.lock", func() {
 			BeforeEach(func() {

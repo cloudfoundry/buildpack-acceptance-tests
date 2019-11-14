@@ -92,17 +92,11 @@ func ApiHasStackAssociation() bool {
 }
 
 func AssertUsesProxyDuringStagingIfPresent(fixturePath string) {
-	Context("with an uncached buildpack", func() {
-		BeforeEach(func() {
-			if cutlass.Cached {
-				Skip("Running cached tests")
-			}
-		})
+	if cutlass.Cached {
+		Skip("Running cached tests")
+	}
 
-		It("uses a proxy during staging if present", func() {
-			Expect(cutlass.EnsureUsesProxy(fixturePath, packagedBuildpack.File)).To(Succeed())
-		})
-	})
+	Expect(cutlass.EnsureUsesProxy(fixturePath, packagedBuildpack.File)).To(Succeed())
 }
 
 func AssertNoInternetTraffic(fixturePath string) {
