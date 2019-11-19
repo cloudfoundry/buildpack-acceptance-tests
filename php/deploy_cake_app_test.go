@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/cloudfoundry/libbuildpack/cutlass"
 
@@ -17,37 +18,38 @@ var _ = Describe("CF PHP Buildpack", func() {
 	//   fix is to remove mcrypt extension from .bp-config/options.json
 	Context("deploying a Cake application with local dependencies", func() {
 		PIt("", func() {
-			SkipUnlessCached()
-			app = cutlass.New(Fixtures("cake_local_deps"))
-			app.StartCommand = "$HOME/bin/cake migrations migrate && $HOME/.bp/bin/start"
-			PushAppAndConfirm(app)
+			if cutlass.Cached {
+				app = cutlass.New(filepath.Join(testdata, "cake_local_deps"))
+				app.StartCommand = "$HOME/bin/cake migrations migrate && $HOME/.bp/bin/start"
+				PushAppAndConfirm(app)
 
-			body, err := app.GetBody("/")
-			Expect(err).ToNot(HaveOccurred())
-			Expect(body).To(ContainSubstring("CakePHP"))
-			Expect(body).ToNot(ContainSubstring("Missing Database Table"))
+				body, err := app.GetBody("/")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(body).To(ContainSubstring("CakePHP"))
+				Expect(body).ToNot(ContainSubstring("Missing Database Table"))
 
-			Expect(app.GetBody("/users/add")).To(ContainSubstring("Add User"))
+				Expect(app.GetBody("/users/add")).To(ContainSubstring("Add User"))
+				AssertNoInternetTraffic("cake_local_deps")
+			}
 		})
-
-		AssertNoInternetTraffic("cake_local_deps")
 	})
 
 	// broken picks PHP 7.3 because of composer.json PHP requirement, yet the fixture asks for mcrypt extension which is gone in 7.3
 	//  fix is to remove mcrypt extension from .bp-config/options.json
 	Context("deploying a Cake application with remote dependencies", func() {
 		PIt("", func() {
-			SkipUnlessUncached()
-			app = cutlass.New(Fixtures("cake_remote_deps"))
-			app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
-			app.StartCommand = "$HOME/bin/cake migrations migrate && $HOME/.bp/bin/start"
-			PushAppAndConfirm(app)
+			if !cutlass.Cached {
+				app = cutlass.New(filepath.Join(testdata, "cake_remote_deps"))
+				app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
+				app.StartCommand = "$HOME/bin/cake migrations migrate && $HOME/.bp/bin/start"
+				PushAppAndConfirm(app)
 
-			body, err := app.GetBody("/")
-			Expect(err).ToNot(HaveOccurred())
-			Expect(body).To(ContainSubstring("CakePHP"))
-			Expect(body).ToNot(ContainSubstring("Missing Database Table"))
-			Expect(app.GetBody("/users/add")).To(ContainSubstring("Add User"))
+				body, err := app.GetBody("/")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(body).To(ContainSubstring("CakePHP"))
+				Expect(body).ToNot(ContainSubstring("Missing Database Table"))
+				Expect(app.GetBody("/users/add")).To(ContainSubstring("Add User"))
+			}
 		})
 	})
 })

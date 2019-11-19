@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/cloudfoundry/libbuildpack/cutlass"
 
@@ -11,10 +12,10 @@ import (
 
 var _ = Describe("CF PHP Buildpack", func() {
 	var app *cutlass.App
-	//AfterEach(func() { app = DestroyApp(app) })
+	AfterEach(func() { app = DestroyApp(app) })
 
 	BeforeEach(func() {
-		app = cutlass.New(Fixtures("php_app"))
+		app = cutlass.New(filepath.Join(testdata, "php_app"))
 		app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
 		app.SetEnv("BP_DEBUG", "1")
 	})
@@ -46,9 +47,7 @@ var _ = Describe("CF PHP Buildpack", func() {
 		if cutlass.Cached {
 			By("downloads the binaries directly from the buildpack")
 			Expect(app.Stdout.String()).To(MatchRegexp(`Downloaded \[file://.*/dependencies/https___buildpacks.cloudfoundry.org_dependencies_php_php.*-linux-x64-.*.tgz\] to \[/tmp\]`))
+			AssertNoInternetTraffic("php_app")
 		}
 	})
-
-	// TODO: uncomment and run
-	//AssertNoInternetTraffic("php_app")
 })

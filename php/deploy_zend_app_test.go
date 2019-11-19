@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/cloudfoundry/libbuildpack/cutlass"
 
@@ -13,23 +14,29 @@ var _ = Describe("CF PHP Buildpack", func() {
 	var app *cutlass.App
 	AfterEach(func() { app = DestroyApp(app) })
 
-	// broken pending fix in php-composer-cnb to handle local vendor directories
+	// test fixture use `$_ENV` to get VCAP_SERVICES, `$_ENV` is not used anymore
+	//   as it is not recomended, should use `getenv(..)` instead.
 	PIt("deploying a Zend app with locally-vendored dependencies", func() {
-		app = cutlass.New(Fixtures("zend_local_deps"))
-		PushAppAndConfirm(app)
+		if cutlass.Cached {
+			app = cutlass.New(filepath.Join(testdata, "zend_local_deps"))
+			app.Disk = "512M"
+			PushAppAndConfirm(app)
 
-		Expect(app.GetBody("/")).To(ContainSubstring("Zend Framework 2"))
+			Expect(app.GetBody("/")).To(ContainSubstring("Zend Framework 2"))
+			AssertNoInternetTraffic("zend_local_deps")
+		}
 	})
 
-	AssertNoInternetTraffic("zend_local_deps")
-
-	// broken pending fix in php-composer-cnb where composer dependency name was wrong in buildpack.toml
-	//   composer 1.8.5 seems to be broken
+	// test fixture use `$_ENV` to get VCAP_SERVICES, `$_ENV` is not used anymore
+	//	//   as it is not recomended, should use `getenv(..)` instead.
 	PIt("deploying a Zend app with remote dependencies", func() {
-		app = cutlass.New(Fixtures("zend_remote_deps"))
-		app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
-		PushAppAndConfirm(app)
+		if !cutlass.Cached {
+			app = cutlass.New(filepath.Join(testdata, "zend_remote_deps"))
+			app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
+			app.Disk = "512M"
+			PushAppAndConfirm(app)
 
-		Expect(app.GetBody("/")).To(ContainSubstring("Zend Framework 2"))
+			Expect(app.GetBody("/")).To(ContainSubstring("Zend Framework 2"))
+		}
 	})
 })
