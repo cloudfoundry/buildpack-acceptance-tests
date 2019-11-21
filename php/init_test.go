@@ -19,6 +19,11 @@ var (
 	packagedBuildpack cutlass.VersionedBuildpackPackage
 )
 
+var _ = func() bool {
+	testing.Init()
+	return true
+}()
+
 func init() {
 	flag.StringVar(&packagedBuildpack.File, "buildpack", "", "path to a packaged buildpack")
 	flag.StringVar(&packagedBuildpack.Version, "buildpack-version", "", "version of the packaged buildpack")

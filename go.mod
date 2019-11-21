@@ -1,7 +1,5 @@
 module github.com/cloudfoundry/buildpack-acceptance-tests
 
-go 1.12
-
 require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cloudfoundry/cnb2cf v0.0.0-20191111214605-8288b2d1ebee // indirect
@@ -11,3 +9,5 @@ require (
 	golang.org/x/net v0.0.0-20191109021931-daa7c04131f5 // indirect
 	golang.org/x/sys v0.0.0-20191110163157-d32e6e3b99c4 // indirect
 )
+
+go 1.13
