@@ -18,10 +18,12 @@ var _ = Describe("CF PHP Buildpack", func() {
 		BeforeEach(func() {
 			app = cutlass.New(filepath.Join(testdata, "with_nginx"))
 			app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
+			app.SetEnv("LOG_LEVEL", os.Getenv("LOG_LEVEL"))
 			PushAppAndConfirm(app)
 		})
 
-		FIt("succeeds", func() {
+		// does not provide a WEBDIR, this is now required. Add a WEBDIR to fix this
+		PIt("succeeds", func() {
 			By("shows the current buildpack version for useful info")
 			Expect(app.Stdout.String()).To(ContainSubstring("-------> Buildpack version " + packagedBuildpack.Version))
 
