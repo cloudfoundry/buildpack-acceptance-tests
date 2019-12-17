@@ -77,14 +77,14 @@ function util::tools::pack::install() {
             url="$(
                 curl -s \
                     -H "Authorization: token ${GIT_TOKEN}" \
-                    https://api.github.com/repos/buildpack/pack/releases/latest \
+                    https://api.github.com/repos/buildpacks/pack/releases/latest \
                     | jq --raw-output '.assets[1] | .browser_download_url'
                 )"
         else
             url="$(
                 curl -s \
                     -H "Authorization: token ${GIT_TOKEN}" \
-                    https://api.github.com/repos/buildpack/pack/releases/latest \
+                    https://api.github.com/repos/buildpacks/pack/releases/latest \
                     | jq --raw-output '.assets[0] | .browser_download_url'
                 )"
         fi
@@ -92,7 +92,7 @@ function util::tools::pack::install() {
     else
         local tarball
         tarball="pack-${version}-${os}.tar.gz"
-        url="https://github.com/buildpack/pack/releases/download/v${version}/${tarball}"
+        url="https://github.com/buildpacks/pack/releases/download/v${version}/${tarball}"
         util::tools::pack::expand "${dir}" "${url}"
     fi
 }
