@@ -1,7 +1,9 @@
 package integration_test
 
 import (
+	"fmt"
 	"github.com/cloudfoundry/libbuildpack/cutlass"
+	"os"
 	"path/filepath"
 
 	. "github.com/onsi/ginkgo"
@@ -10,22 +12,22 @@ import (
 
 var _ = Describe("An app deployed specifying unsupported extensions and valid", func() {
 	var app *cutlass.App
+	BeforeEach(func() {
+		app = cutlass.New(filepath.Join(testdata, "unsupported_extensions"))
+		app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
+		app.SetEnv("BP_DEBUG", os.Getenv("LOG_LEVEL"))
+	})
 	AfterEach(func() { app = DestroyApp(app) })
 
-	//Broken - This fixture needs its files put into a WEBDIR
-	PIt("runs", func() {
-		app = cutlass.New(filepath.Join(testdata, "unsupported_extensions"))
+	It("runs", func() {
 		PushAppAndConfirm(app)
 
-		By("should say which extensions are not supported")
-		Expect(app.Stdout.String()).To(ContainSubstring("The extension 'meatball' is not provided by this buildpack."))
-		Expect(app.Stdout.String()).To(ContainSubstring("The extension 'hotdog' is not provided by this buildpack."))
-
 		By("should not display default php startup warning messages")
-		Expect(app.Stdout.String()).ToNot(ContainSubstring("PHP message: PHP Warning:  PHP Startup: Unable to load dynamic library"))
 
-		By("should say which extensions are not supported")
-		Expect(app.Stdout.String()).ToNot(ContainSubstring("The extension 'curl' is not provided by this buildpack."))
+		for _, extension := range []string{"hotdog", "meatball"} {
+			msg := fmt.Sprintf("NOTICE: PHP message: PHP Warning:  PHP Startup: Unable to load dynamic library '%s.so'", extension)
+			Expect(app.Stdout.String()).To(ContainSubstring(msg))
+		}
 
 		By("should load the module without issue")
 		Expect(app.GetBody("/")).To(ContainSubstring("curl module has been loaded successfully"))

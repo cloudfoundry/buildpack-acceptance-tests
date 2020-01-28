@@ -140,7 +140,7 @@ function main() {
       tmpdir="$(mktemp -d)"
 
       cp -r "${buildpack_input}/" "${tmpdir}"
-      buildpack="$(set -e; integration::package "$(cd "${tmpdir}" && pwd)" "${buildpack_version}" "${stack}")"
+      buildpack="$(set -e; integration::package "$(cd "${tmpdir}" && pwd)" "${buildpack_version}" "${stack}" "${cached}")"
     fi
 
     util::print::title "Running Integration Test Suite"
@@ -188,13 +188,24 @@ function integration::package() {
   dir="${1}"
   version="${2}"
   stack="${3}"
+  cached="${4}"
 
-  pushd "${dir}" > /dev/null || return
-    "${ROOTDIR}/.bin/cnb2cf" package \
-      --version "${version}" \
-      --stack "${stack}" \
-      1>&2
-  popd > /dev/null || return
+  if [ "$cached" == "true" ]; then
+    pushd "${dir}" > /dev/null || return
+      "${ROOTDIR}/.bin/cnb2cf" package \
+        --version "${version}" \
+        --stack "${stack}" \
+        --cached \
+        1>&2
+    popd > /dev/null || return
+  else
+    pushd "${dir}" > /dev/null || return
+      "${ROOTDIR}/.bin/cnb2cf" package \
+        --version "${version}" \
+        --stack "${stack}" \
+        1>&2
+    popd > /dev/null || return
+  fi
 
   local zip_dir
   zip_dir="$(mktemp -d)"

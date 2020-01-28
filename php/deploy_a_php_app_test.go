@@ -17,16 +17,14 @@ var _ = Describe("CF PHP Buildpack", func() {
 	BeforeEach(func() {
 		app = cutlass.New(filepath.Join(testdata, "php_app"))
 		app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
-		app.SetEnv("BP_DEBUG", "1")
+		app.SetEnv("BP_DEBUG", os.Getenv("LOG_LEVEL"))
 	})
 
-	// NOTE: Marked as pending because the test currently fails. The app fails to stage because it does not have a $WEBDIR that the buildpack can determine.
-	PIt("deploying a basic PHP app", func() {
+	It("deploying a basic PHP app", func() {
 		PushAppAndConfirm(app)
 
 		By("installs our hard-coded default version of PHP")
-		Expect(app.Stdout.String()).To(ContainSubstring("Installing PHP"))
-		Expect(app.Stdout.String()).To(ContainSubstring("PHP 7.2"))
+		Expect(app.Stdout.String()).To(MatchRegexp(`PHP.*7\.2\.\d+.*Contributing.* to layer`))
 
 		By("does not return the version of PHP in the response headers")
 		body, headers, err := app.Get("/", map[string]string{})
@@ -34,20 +32,11 @@ var _ = Describe("CF PHP Buildpack", func() {
 		Expect(body).To(ContainSubstring("PHP Version"))
 		Expect(headers).ToNot(HaveKey("X-Powered-By"))
 
-		By("does not display a warning message about the php version config")
-		Expect(app.Stdout.String()).ToNot(ContainSubstring("WARNING: A version of PHP has been specified in both `composer.json` and `./bp-config/options.json`."))
-		Expect(app.Stdout.String()).ToNot(ContainSubstring("WARNING: The version defined in `composer.json` will be used."))
-
-		By("installs the default version of PHP")
-		Expect(app.Stdout.String()).To(ContainSubstring(`"update_default_version" is setting [PHP_VERSION]`))
-
-		By("installs the default version of composer")
-		Expect(app.Stdout.String()).To(ContainSubstring("DEBUG: default_version_for composer is"))
-
 		if cutlass.Cached {
 			By("downloads the binaries directly from the buildpack")
-			Expect(app.Stdout.String()).To(MatchRegexp(`Downloaded \[file://.*/dependencies/https___buildpacks.cloudfoundry.org_dependencies_php_php.*-linux-x64-.*.tgz\] to \[/tmp\]`))
-			AssertNoInternetTraffic("php_app")
+			// use of RegEx is required because of weird color/terminal control characters from libcfbuildpack
+			Expect(app.Stdout.String()).To(MatchRegexp(`Reusing.*cached download from buildpack`))
+			AssertNoInternetTraffic("testdata/php_app")
 		}
 	})
 })

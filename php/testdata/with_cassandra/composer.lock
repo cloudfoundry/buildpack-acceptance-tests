@@ -1,0 +1,68 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "1ccc1db8c2088389f12b950cecc792ba",
+    "packages": [
+        {
+            "name": "cloudfoundry-community/cf-helper-php",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cloudfoundry-community/cf-helper-php.git",
+                "reference": "9ddd61d6a248eced930eaabcc83f0c6e2e98322c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cloudfoundry-community/cf-helper-php/zipball/9ddd61d6a248eced930eaabcc83f0c6e2e98322c",
+                "reference": "9ddd61d6a248eced930eaabcc83f0c6e2e98322c",
+                "shasum": ""
+            },
+            "require-dev": {
+                "mongodb/mongodb": "~1.5",
+                "phpunit/phpunit": "6.5.*",
+                "predis/predis": "~1.0"
+            },
+            "suggest": {
+                "mongodb/mongodb": "Use mongodb in for auto connection",
+                "predis/predis": "Let's you have a redis connection for RedisConnector"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "CfCommunity\\CfHelper\\": "src/CfCommunity/CfHelper/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Arthur Halet",
+                    "email": "arthur.halet@orange.com"
+                }
+            ],
+            "description": "Cloudfoundry helper in php",
+            "keywords": [
+                "CloudFoundry",
+                "helper",
+                "services",
+                "vcapservices"
+            ],
+            "time": "2020-01-08T10:17:36+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "ext-cassandra": "*"
+    },
+    "platform-dev": []
+}

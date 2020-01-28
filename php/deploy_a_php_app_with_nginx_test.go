@@ -22,16 +22,12 @@ var _ = Describe("CF PHP Buildpack", func() {
 			PushAppAndConfirm(app)
 		})
 
-		// does not provide a WEBDIR, this is now required. Add a WEBDIR to fix this
-		PIt("succeeds", func() {
+		It("succeeds", func() {
 			By("shows the current buildpack version for useful info")
-			Expect(app.Stdout.String()).To(ContainSubstring("-------> Buildpack version " + packagedBuildpack.Version))
+			Expect(app.Stdout.String()).To(ContainSubstring("-----> Php Buildpack version " + packagedBuildpack.Version))
 
 			By("installs nginx, the request web server")
-			Expect(app.Stdout.String()).To(ContainSubstring("Installing Nginx"))
-
-			By("logs NginX version")
-			//Expect(app.Stdout.String()).To(ContainSubstring("NGINX " + DefaultVersion("nginx")))
+			Expect(app.Stdout.String()).To(MatchRegexp(`Nginx Server.*1\.\d+\.\d+.*Contributing.* to layer`))
 
 			By("the root endpoint renders a dynamic message")
 			Expect(app.GetBody("/")).To(ContainSubstring("PHP Version"))

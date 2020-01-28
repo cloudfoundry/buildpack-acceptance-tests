@@ -29,7 +29,7 @@ func init() {
 	flag.StringVar(&packagedBuildpack.Version, "buildpack-version", "", "version of the packaged buildpack")
 	flag.BoolVar(&cutlass.Cached, "cutlass.cached", true, "cached buildpack")
 	flag.StringVar(&cutlass.DefaultMemory, "memory", "128M", "default memory for pushed apps")
-	flag.StringVar(&cutlass.DefaultDisk, "disk", "256M", "default disk for pushed apps")
+	flag.StringVar(&cutlass.DefaultDisk, "disk", "512M", "default disk for pushed apps")
 	flag.Parse()
 }
 

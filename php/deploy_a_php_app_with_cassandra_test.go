@@ -32,7 +32,7 @@ var _ = Describe("CF PHP Buildpack", func() {
 	//Broken - This fixture needs its files put into a WEBDIR
 	Context("deploying a basic PHP app using Cassandra module", func() {
 		Context("after the Cassandra module has been loaded into PHP", func() {
-			PIt("configures Cassandra", func() {
+			It("configures Cassandra", func() {
 				app = cutlass.New(filepath.Join(testdata, "with_cassandra"))
 				app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
 				Expect(app.PushNoStart()).To(Succeed())

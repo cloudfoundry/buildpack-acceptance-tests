@@ -19,7 +19,6 @@ var _ = Describe("CF PHP Buildpack", func() {
 	PIt("deploying a Zend app with locally-vendored dependencies", func() {
 		if cutlass.Cached {
 			app = cutlass.New(filepath.Join(testdata, "zend_local_deps"))
-			app.Disk = "512M"
 			PushAppAndConfirm(app)
 
 			Expect(app.GetBody("/")).To(ContainSubstring("Zend Framework 2"))
@@ -33,7 +32,6 @@ var _ = Describe("CF PHP Buildpack", func() {
 		if !cutlass.Cached {
 			app = cutlass.New(filepath.Join(testdata, "zend_remote_deps"))
 			app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
-			app.Disk = "512M"
 			PushAppAndConfirm(app)
 
 			Expect(app.GetBody("/")).To(ContainSubstring("Zend Framework 2"))

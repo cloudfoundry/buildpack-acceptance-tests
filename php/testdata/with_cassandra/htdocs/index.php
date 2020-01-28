@@ -1,7 +1,7 @@
 <?php
-require_once 'vendor/autoload.php';
+require_once __DIR__ .'/../vendor/autoload.php';
 use CfCommunity\CfHelper\CfHelper;
-$cfHelper = CfHelper::getInstance();
+$cfHelper = new CfHelper();
 
 # Get Cassandra VCAP_SERVICES values
 $serviceManager = $cfHelper->getServiceManager();
