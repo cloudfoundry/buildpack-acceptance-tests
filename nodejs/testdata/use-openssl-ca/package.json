@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
-    "node": "~>8"
+    "node": "~>10"
   },
   "dependencies": {
     "leftpad": "~0.0.1"

@@ -36,7 +36,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 			It("resolves to a nodeJS version successfully", func() {
 				PushAppAndConfirm(app)
 
-				Eventually(app.Stdout.ANSIStrippedString).Should(MatchRegexp(`Node Engine \d+\.\d+\.\d+: Contributing to layer`))
+				Eventually(app.Stdout.ANSIStrippedString).Should(MatchRegexp(`Installing Node Engine \d+\.\d+\.\d+`))
 				Expect(app.GetBody("/")).To(ContainSubstring("Hello, World!"))
 
 				if ApiHasTask() {
@@ -63,7 +63,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 			It("resolves to the stable nodeJS version successfully", func() {
 				PushAppAndConfirm(app)
 				defaultNode := "10"
-				Eventually(app.Stdout.ANSIStrippedString).Should(MatchRegexp(fmt.Sprintf(`Node Engine %s\.\d+\.\d+: Contributing to layer`, defaultNode)))
+				Eventually(app.Stdout.ANSIStrippedString).Should(MatchRegexp(fmt.Sprintf(`Installing Node Engine %s\.\d+\.\d+`, defaultNode)))
 				Expect(app.GetBody("/")).To(ContainSubstring("Hello, World!"))
 			})
 		})
@@ -76,7 +76,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 			It("displays a nice error message and gracefully fails", func() {
 				Expect(app.Push()).ToNot(BeNil())
 
-				Eventually(app.Stdout.ANSIStrippedString, 2*time.Second).Should(ContainSubstring("no valid dependencies for node, 9000.0.0"))
+				Eventually(app.Stdout.ANSIStrippedString, 2*time.Second).Should(ContainSubstring(`failed to satisfy "node" dependency version constraint "9000.0.0": no compatible versions`))
 				Expect(app.ConfirmBuildpack(packagedBuildpack.Version)).To(Succeed())
 			})
 		})
@@ -89,7 +89,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 			It("displays a nice error messages and gracefully fails", func() {
 				Expect(app.Push()).ToNot(BeNil())
 
-				Eventually(app.Stdout.ANSIStrippedString, 2*time.Second).Should(ContainSubstring("no valid dependencies for node, 4.1.1"))
+				Eventually(app.Stdout.ANSIStrippedString, 2*time.Second).Should(ContainSubstring(`failed to satisfy "node" dependency version constraint "4.1.1": no compatible versions`))
 				Expect(app.ConfirmBuildpack(packagedBuildpack.Version)).To(Succeed())
 			})
 		})
@@ -142,24 +142,6 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 				By("does not output protip that recommends user vendors dependencies", func() {
 					Expect(app.Stdout.ANSIStrippedString()).ToNot(MatchRegexp("It is recommended to vendor the application's Node.js dependencies"))
 				})
-
-				if !cutlass.Cached {
-					By("with an uncached buildpack", func() {
-						By("successfully deploys and includes the dependencies", func() {
-							Expect(app.GetBody("/")).To(ContainSubstring("0000000005"))
-							Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Downloading from https://"))
-						})
-					})
-				}
-
-				if cutlass.Cached {
-					By("with a cached buildpack", func() {
-						By("deploys without hitting the internet", func() {
-							Expect(app.GetBody("/")).To(ContainSubstring("0000000005"))
-							Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Copy [/tmp/buildpacks/"))
-						})
-					})
-				}
 			})
 
 			It("is not internet connected", func() {
@@ -304,7 +286,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 
 		It("sets the NODE_HOME to correct value", func() {
 			PushAppAndConfirm(app)
-			Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Writing NODE_HOME"))
+			Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("NODE_HOME    -> /home/vcap/deps/org.cloudfoundry.node-engine/node"))
 
 			body, err := app.GetBody("/")
 			Expect(err).NotTo(HaveOccurred())
@@ -321,7 +303,6 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 
 		It("runs .profile script when staging", func() {
 			PushAppAndConfirm(app)
-			Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Writing NODE_HOME"))
 
 			_, err := app.GetBody("/")
 			Expect(err).NotTo(HaveOccurred())
