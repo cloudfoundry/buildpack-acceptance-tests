@@ -11,7 +11,7 @@
  * file.
  */
 
-$vcapServices = \Zend\Json\Json::decode($_ENV['VCAP_SERVICES'], \Zend\Json\Json::TYPE_ARRAY);
+$vcapServices = \Zend\Json\Json::decode(getenv('VCAP_SERVICES'), \Zend\Json\Json::TYPE_ARRAY);
 $clearDbCreds = $vcapServices['cleardb'][0]['credentials'];
 
 return array(
@@ -23,10 +23,10 @@ return array(
         'password'  => $clearDbCreds['password'],
     ),
     'scn-social-auth' => array(
-        'facebook_client_id' => $_ENV['facebook_client_id'],
-        'facebook_secret' => $_ENV['facebook_secret'],
-        'twitter_consumer_key' => $_ENV['twitter_consumer_key'],
-        'twitter_consumer_secret' => $_ENV['twitter_consumer_secret'],
+        'facebook_client_id' => getenv('facebook_client_id'),
+        'facebook_secret' => getenv('facebook_secret'),
+        'twitter_consumer_key' => getenv('twitter_consumer_key'),
+        'twitter_consumer_secret' => getenv('twitter_consumer_secret'),
     ),
     'service_manager' => array(
         'factories' => array(

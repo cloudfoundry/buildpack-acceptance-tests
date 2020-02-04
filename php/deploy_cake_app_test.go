@@ -14,13 +14,11 @@ var _ = Describe("CF PHP Buildpack", func() {
 	var app *cutlass.App
 	AfterEach(func() { app = DestroyApp(app) })
 
-	// broken picks PHP 7.3 because of composer.json PHP requirement, yet the fixture asks for mcrypt extension which is gone in 7.3
-	//   fix is to remove mcrypt extension from .bp-config/options.json
 	Context("deploying a Cake application with local dependencies", func() {
-		PIt("", func() {
+		It("", func() {
 			if cutlass.Cached {
 				app = cutlass.New(filepath.Join(testdata, "cake_local_deps"))
-				app.StartCommand = "$HOME/bin/cake migrations migrate && $HOME/.bp/bin/start"
+				app.StartCommand = "$HOME/bin/cake migrations migrate && procmgr /home/vcap/deps/org.cloudfoundry.php-web/php-web/procs.yml"
 				PushAppAndConfirm(app)
 
 				body, err := app.GetBody("/")
@@ -29,19 +27,20 @@ var _ = Describe("CF PHP Buildpack", func() {
 				Expect(body).ToNot(ContainSubstring("Missing Database Table"))
 
 				Expect(app.GetBody("/users/add")).To(ContainSubstring("Add User"))
-				AssertNoInternetTraffic("cake_local_deps")
 			}
+		})
+
+		It("uses a proxy during staging", func() {
+			AssertUsesProxyDuringStagingIfPresent(filepath.Join(testdata, "cake_local_deps"))
 		})
 	})
 
-	// broken picks PHP 7.3 because of composer.json PHP requirement, yet the fixture asks for mcrypt extension which is gone in 7.3
-	//  fix is to remove mcrypt extension from .bp-config/options.json
 	Context("deploying a Cake application with remote dependencies", func() {
-		PIt("", func() {
+		It("", func() {
 			if !cutlass.Cached {
 				app = cutlass.New(filepath.Join(testdata, "cake_remote_deps"))
 				app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
-				app.StartCommand = "$HOME/bin/cake migrations migrate && $HOME/.bp/bin/start"
+				app.StartCommand = "$HOME/bin/cake migrations migrate && procmgr /home/vcap/deps/org.cloudfoundry.php-web/php-web/procs.yml"
 				PushAppAndConfirm(app)
 
 				body, err := app.GetBody("/")

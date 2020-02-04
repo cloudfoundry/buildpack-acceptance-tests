@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/cloudfoundry/libbuildpack/cutlass"
@@ -29,12 +30,17 @@ var _ = Describe("CF PHP Buildpack", func() {
 		_ = RunCf("delete-service", "-f", serviceName)
 	})
 
-	//Broken - This fixture needs its files put into a WEBDIR
 	Context("deploying a basic PHP app using Cassandra module", func() {
 		Context("after the Cassandra module has been loaded into PHP", func() {
 			It("configures Cassandra", func() {
 				app = cutlass.New(filepath.Join(testdata, "with_cassandra"))
 				app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
+				app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
+
+				logLevel, found := os.LookupEnv("LOG_LEVEL")
+				app.SetEnv("BP_DEBUG", strconv.FormatBool(found))
+				app.SetEnv("LOG_LEVEL", logLevel)
+
 				Expect(app.PushNoStart()).To(Succeed())
 
 				cassandraHost, found := os.LookupEnv("CASSANDRA_HOST")
