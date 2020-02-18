@@ -18,7 +18,7 @@ var _ = Describe("Node.js applications with unmet dependencies", func() {
 		app = nil
 	})
 
-	Context("package manager is npm", func() {
+	PContext("package manager is npm", func() {
 		BeforeEach(func() {
 			app = cutlass.New(filepath.Join(testdata, "unmet_dep_npm"))
 		})
