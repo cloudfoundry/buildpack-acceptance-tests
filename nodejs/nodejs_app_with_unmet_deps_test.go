@@ -18,17 +18,6 @@ var _ = Describe("Node.js applications with unmet dependencies", func() {
 		app = nil
 	})
 
-	Context("package manager is npm", func() {
-		BeforeEach(func() {
-			app = cutlass.New(filepath.Join(testdata, "unmet_dep_npm"))
-		})
-
-		It("warns that unmet dependencies may cause issues", func() {
-			PushAppAndConfirm(app)
-			Expect(app.Stdout.String()).To(ContainSubstring("Unmet dependencies don't fail npm install but may cause runtime issues"))
-		})
-	})
-
 	Context("package manager is yarn", func() {
 		BeforeEach(func() {
 			app = cutlass.New(filepath.Join(testdata, "unmet_dep_yarn"))

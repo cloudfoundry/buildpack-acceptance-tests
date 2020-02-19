@@ -137,11 +137,9 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 			It("deploys", func() {
 				app = cutlass.New(filepath.Join(testdata, "vendored_dependencies"))
 				PushAppAndConfirm(app)
-				Expect(app.Stdout.ANSIStrippedString()).To(ContainSubstring("running npm rebuild"))
 
-				By("does not output protip that recommends user vendors dependencies", func() {
-					Expect(app.Stdout.ANSIStrippedString()).ToNot(MatchRegexp("It is recommended to vendor the application's Node.js dependencies"))
-				})
+				Expect(app.Stdout.ANSIStrippedString()).To(ContainSubstring("Selected NPM build process: npm rebuild"))
+
 			})
 
 			It("is not internet connected", func() {
@@ -183,17 +181,6 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 			})
 		})
 
-		Context("with an incomplete node_modules directory", func() {
-			BeforeEach(func() {
-				app = cutlass.New(filepath.Join(testdata, "incomplete_node_modules"))
-			})
-
-			It("downloads missing dependencies from package.json", func() {
-				PushAppAndConfirm(app)
-				Expect(filepath.Join(app.Path, "node_modules")).To(BeADirectory())
-				Expect(filepath.Join(app.Path, "node_modules", "hashish")).ToNot(BeADirectory())
-			})
-		})
 		Context("with an incomplete package.json", func() {
 			BeforeEach(func() {
 				app = cutlass.New(filepath.Join(testdata, "incomplete_package_json"))
@@ -202,8 +189,8 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 			It("does not overwrite the vendored modules not listed in package.json", func() {
 				PushAppAndConfirm(app)
 				Expect(app.Files(".")).To(ContainElement(ContainSubstring("node_modules/leftpad")))
-				Expect(app.Files(".")).NotTo(ContainElement(ContainSubstring("node_modules/hashish")))
-				Expect(app.Files(".")).NotTo(ContainElement(ContainSubstring("node_modules/traverse")))
+				Expect(app.Files(".")).To(ContainElement(ContainSubstring("node_modules/hashish")))
+				Expect(app.Files(".")).To(ContainElement(ContainSubstring("node_modules/traverse")))
 			})
 		})
 	})
@@ -219,12 +206,8 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 
 				Expect(filepath.Join(app.Path, "node_modules")).ToNot(BeADirectory())
 
-				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("running npm install"))
+				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Selected NPM build process: npm install"))
 				Expect(app.GetBody("/")).To(ContainSubstring("Hello, World!"))
-
-				By("outputs protip that recommends user vendors dependencies", func() {
-					Eventually(app.Stdout.ANSIStrippedString).Should(MatchRegexp("It is recommended to vendor the application's Node.js dependencies"))
-				})
 			})
 
 			It("uses a proxy during staging", func() {
@@ -274,7 +257,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 
 			It("runs the postinstall script in the app directory", func() {
 				PushAppAndConfirm(app)
-				Eventually(app.Stdout.ANSIStrippedString, 2*time.Second).Should(ContainSubstring("Current dir: /home/vcap/app")) ///home/vcap/app is the v3 app dir
+				Expect(app.GetBody("/")).To(ContainSubstring("Current dir: /home/vcap/app"))
 			})
 		})
 	})
