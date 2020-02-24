@@ -225,7 +225,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 
 				Expect(filepath.Join(app.Path, "node_modules")).ToNot(BeADirectory())
 
-				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Running yarn in online mode"))
+				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Running 'yarn install'"))
 
 				Expect(app.GetBody("/")).To(ContainSubstring("Hello, World!"))
 			})
@@ -234,16 +234,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 				AssertUsesProxyDuringStagingIfPresent(filepath.Join(testdata, "with_yarn"))
 			})
 		})
-		Context("with an app with an out of date yarn.lock", func() {
-			BeforeEach(func() {
-				app = cutlass.New(filepath.Join(testdata, "out_of_date_yarn_lock"))
-			})
 
-			It("warns that yarn.lock is out of date", func() {
-				PushAppAndConfirm(app)
-				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("yarn.lock is outdated"))
-			})
-		})
 		Context("with an app with pre and post scripts", func() {
 			BeforeEach(func() {
 				app = cutlass.New(filepath.Join(testdata, "pre_post_commands"))
