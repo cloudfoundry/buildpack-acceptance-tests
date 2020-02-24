@@ -138,7 +138,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 				app = cutlass.New(filepath.Join(testdata, "vendored_dependencies"))
 				PushAppAndConfirm(app)
 
-				Expect(app.Stdout.ANSIStrippedString()).To(ContainSubstring("Selected NPM build process: npm rebuild"))
+				Expect(app.Stdout.ANSIStrippedString()).To(ContainSubstring("Selected NPM build process: 'npm rebuild'"))
 
 			})
 
@@ -206,7 +206,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 
 				Expect(filepath.Join(app.Path, "node_modules")).ToNot(BeADirectory())
 
-				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Selected NPM build process: npm install"))
+				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Selected NPM build process: 'npm install'"))
 				Expect(app.GetBody("/")).To(ContainSubstring("Hello, World!"))
 			})
 
