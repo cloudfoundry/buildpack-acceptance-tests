@@ -225,7 +225,7 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 
 				Expect(filepath.Join(app.Path, "node_modules")).ToNot(BeADirectory())
 
-				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Running 'yarn install'"))
+				Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("Selected default build process: 'yarn install'"))
 
 				Expect(app.GetBody("/")).To(ContainSubstring("Hello, World!"))
 			})
@@ -260,8 +260,6 @@ var _ = Describe("CF NodeJS Buildpack", func() {
 
 		It("sets the NODE_HOME to correct value", func() {
 			PushAppAndConfirm(app)
-			Eventually(app.Stdout.ANSIStrippedString).Should(ContainSubstring("NODE_HOME    -> /home/vcap/deps/org.cloudfoundry.node-engine/node"))
-
 			body, err := app.GetBody("/")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(body).To(MatchRegexp(`"NODE_HOME":"[^"]*/node"`))
