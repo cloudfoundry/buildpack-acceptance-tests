@@ -119,6 +119,18 @@ function main() {
       export CUTLASS_DEBUG="true"
     fi
 
+    local buildpack
+    buildpack="${buildpack_input}"
+
+    util::print::title "Running Integration Test Suite"
+    util::print::info "  language:           ${language}"
+    util::print::info "  buildpack:          ${buildpack}"
+    util::print::info "  buildpack-version:  ${buildpack_version}"
+    util::print::info "  stack:              ${stack}"
+    util::print::info "  pack-version:       ${pack_version}"
+    util::print::info "  cached:             ${cached}"
+    util::print::info "  debug:              ${debug}"
+
     GIT_TOKEN="$(util::git::token::fetch)"
     export GIT_TOKEN
 
@@ -132,9 +144,6 @@ function main() {
 
     export PATH="${ROOTDIR}/.bin:${PATH}"
 
-    local buildpack
-    buildpack="${buildpack_input}"
-
     if [[ "${buildpack_input}" != *.zip ]]; then
       local tmpdir
       tmpdir="$(mktemp -d)"
@@ -142,15 +151,6 @@ function main() {
       cp -r "${buildpack_input}/" "${tmpdir}"
       buildpack="$(set -e; integration::package "$(cd "${tmpdir}" && pwd)" "${buildpack_version}" "${stack}" "${cached}")"
     fi
-
-    util::print::title "Running Integration Test Suite"
-    util::print::info "  language:           ${language}"
-    util::print::info "  buildpack:          ${buildpack}"
-    util::print::info "  buildpack-version:  ${buildpack_version}"
-    util::print::info "  stack:              ${stack}"
-    util::print::info "  pack-version:       ${pack_version}"
-    util::print::info "  cached:             ${cached}"
-    util::print::info "  debug:              ${debug}"
 
     integration::run "${buildpack}" "${language}" "${buildpack_version}"
 }
