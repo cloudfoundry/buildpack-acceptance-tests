@@ -1,6 +1,8 @@
 package integration_test
 
 import (
+	"regexp"
+
 	"github.com/cloudfoundry/libbuildpack/cutlass"
 
 	. "github.com/onsi/ginkgo"
@@ -9,8 +11,8 @@ import (
 
 var _ = Describe("pushing an app a second time", func() {
 	const (
-		DownloadRegexp = `Download \[.*/dotnet-sdk\..*\.tar\.xz\]`
-		CopyRegexp     = `Copy \[.*/dotnet-sdk\..*\.tar\.xz\]`
+		DownloadRegexp = `Downloading from .*\/dotnet-sdk\..*\.tar\.xz`
+		ReuseRegexp    = `Reusing cached download from previous build`
 	)
 
 	var app *cutlass.App
@@ -19,23 +21,29 @@ var _ = Describe("pushing an app a second time", func() {
 		SkipUnlessUncached()
 
 		app = cutlass.New(Fixtures("source_2.1_float_runtime"))
-		app.SetEnv("BP_DEBUG", "true")
 		app.Buildpacks = []string{"dotnet_core_buildpack"}
 	})
 
 	AfterEach(func() {
 		PrintFailureLogs(app.Name)
-		app = DestroyApp(app)
+		//app = DestroyApp(app)
 	})
 
-	PIt("uses the cache for manifest dependencies", func() {
+	It("uses the cache for manifest dependencies", func() {
 		PushAppAndConfirm(app)
-		Expect(app.Stdout.String()).To(MatchRegexp(DownloadRegexp))
-		Expect(app.Stdout.String()).ToNot(MatchRegexp(CopyRegexp))
+		Expect(app.Stdout.ANSIStrippedString()).To(MatchRegexp(DownloadRegexp))
+		Expect(app.Stdout.ANSIStrippedString()).ToNot(MatchRegexp(ReuseRegexp))
 
 		app.Stdout.Reset()
 		PushAppAndConfirm(app)
-		Expect(app.Stdout.String()).To(MatchRegexp(CopyRegexp))
-		Expect(app.Stdout.String()).ToNot(MatchRegexp(DownloadRegexp))
+		reuseRe := regexp.MustCompile(ReuseRegexp)
+
+		// These assertion are under the assumption the following meta buildpack is used:
+		// https://github.com/cloudfoundry/dotnet-core-cnb/blob/master/compat/buildpack.toml
+
+		reuseMatches := reuseRe.FindAllString(app.Stdout.ANSIStrippedString(), -1)
+		Expect(reuseMatches).To(HaveLen(3))
+
+		Expect(app.Stdout.ANSIStrippedString()).ToNot(MatchRegexp(DownloadRegexp))
 	})
 })
