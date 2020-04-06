@@ -54,21 +54,6 @@ var _ = Describe("CF Dotnet Buildpack", func() {
 			})
 		})
 
-		Context("deploying a source-based dotnet 3 app", func() {
-			Context("with dotnet-runtime 3.0", func() {
-				BeforeEach(func() {
-					SkipUnlessStack("cflinuxfs3")
-					app = cutlass.New(Fixtures("source_3_0_app"))
-				})
-
-				It("displays a simple text homepage", func() {
-					PushAppAndConfirm(app)
-
-					Expect(app.GetBody("/")).To(ContainSubstring("Welcome"))
-				})
-			})
-		})
-
 		Context("with dotnet sdk 2.1 in global json", func() {
 			Context("when the sdk exists", func() {
 				BeforeEach(func() {

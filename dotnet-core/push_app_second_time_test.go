@@ -11,7 +11,7 @@ import (
 
 var _ = Describe("pushing an app a second time", func() {
 	const (
-		DownloadRegexp = `Downloading from .*\/dotnet-sdk\..*\.tar\.xz`
+		DownloadRegexp = `Downloading from .*\/dotnet-sdk..*\.tar\.xz`
 		ReuseRegexp    = `Reusing cached download from previous build`
 	)
 
