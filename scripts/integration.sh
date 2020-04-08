@@ -35,7 +35,6 @@ function main() {
     local language buildpack_input buildpack_version debug pack_version cached stack
       cached="false"
       debug="false"
-      pack_version="latest"
       stack="cflinuxfs3"
 
     while [[ "${#}" != 0 ]]; do
@@ -62,11 +61,6 @@ function main() {
 
         --stack)
           stack="${2}"
-          shift 2
-          ;;
-
-        --pack-version)
-          pack_version="${2}"
           shift 2
           ;;
 
@@ -127,7 +121,6 @@ function main() {
     util::print::info "  buildpack:          ${buildpack}"
     util::print::info "  buildpack-version:  ${buildpack_version}"
     util::print::info "  stack:              ${stack}"
-    util::print::info "  pack-version:       ${pack_version}"
     util::print::info "  cached:             ${cached}"
     util::print::info "  debug:              ${debug}"
 
@@ -139,8 +132,7 @@ function main() {
     fi
 
     util::tools::install \
-      --directory "${ROOTDIR}/.bin" \
-      --pack-version "${pack_version}"
+      --directory "${ROOTDIR}/.bin"
 
     export PATH="${ROOTDIR}/.bin:${PATH}"
 

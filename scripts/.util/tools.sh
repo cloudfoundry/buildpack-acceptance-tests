@@ -11,7 +11,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/git.sh"
 function util::tools::install() {
     util::print::title "Installing Testing Tools"
 
-    local dir pack_version
+    local dir
 
     while [[ "${#}" != 0 ]]; do
       case "${1}" in
@@ -25,11 +25,6 @@ function util::tools::install() {
           shift 2
           ;;
 
-        --pack-version)
-          pack_version="${2}"
-          shift 2
-          ;;
-
         *)
           util::print::error "unknown argument \"${1}\""
       esac
@@ -37,76 +32,8 @@ function util::tools::install() {
 
     mkdir -p "${dir}"
 
-    util::tools::pack::install "${dir}" "${pack_version}"
     util::tools::packager::install "${dir}"
     util::tools::cnb2cf::install "${dir}"
-}
-
-function util::tools::pack::install() {
-    local dir version os
-    dir="${1}"
-    version="${2}"
-
-    util::print::title "Installing pack"
-
-    os="$(uname -s)"
-
-    if [[ "${os}" == "Darwin" ]]; then
-        os="macos"
-    elif [[ "${os}" == "Linux" ]]; then
-        os="linux"
-    else
-        util::print::error "Unsupported operating system"
-    fi
-
-    if [[ ! -f "${dir}/pack" ]]; then
-        util::print::info "--> installing..."
-    elif [[ "$("${dir}/pack" version | cut -d ' ' -f 1)" != *${version}* ]]; then
-        rm "${dir}/pack"
-        util::print::info "--> updating..."
-    else
-        util::print::info "--> skipping..."
-        return 0
-    fi
-
-    GIT_TOKEN="$(util::git::token::fetch)"
-
-    if [[ "${version}" == "latest" ]]; then
-        local url
-        if [[ "${os}" == "macos" ]]; then
-            url="$(
-                curl -s \
-                    -H "Authorization: token ${GIT_TOKEN}" \
-                    https://api.github.com/repos/buildpacks/pack/releases/latest \
-                    | jq --raw-output '.assets[1] | .browser_download_url'
-                )"
-        else
-            url="$(
-                curl -s \
-                    -H "Authorization: token ${GIT_TOKEN}" \
-                    https://api.github.com/repos/buildpacks/pack/releases/latest \
-                    | jq --raw-output '.assets[0] | .browser_download_url'
-                )"
-        fi
-        util::tools::pack::expand "${dir}" "${url}"
-    else
-        local tarball
-        tarball="pack-${version}-${os}.tar.gz"
-        url="https://github.com/buildpacks/pack/releases/download/v${version}/${tarball}"
-        util::tools::pack::expand "${dir}" "${url}"
-    fi
-}
-
-function util::tools::pack::expand() {
-    local dir url version
-    dir="${1}"
-    url="${2}"
-    tarball="$(echo "${url}" | sed "s/.*\///")"
-    version="v$(echo "${url}" | sed 's/pack-//' | sed 's/-.*//')"
-
-    curl --location --silent --output "${tarball}" "${url}"
-    tar xzf "${tarball}" -C "${dir}"
-    rm "${tarball}"
 }
 
 function util::tools::packager::install () {
