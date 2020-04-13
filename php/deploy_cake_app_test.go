@@ -18,7 +18,7 @@ var _ = Describe("CF PHP Buildpack", func() {
 		It("", func() {
 			if cutlass.Cached {
 				app = cutlass.New(filepath.Join(testdata, "cake_local_deps"))
-				app.StartCommand = "$HOME/bin/cake migrations migrate && procmgr /home/vcap/deps/org.cloudfoundry.php-web/php-web/procs.yml"
+				app.StartCommand = "$HOME/bin/cake migrations migrate && procmgr /home/vcap/deps/paketo-buildpacks_php-web/php-web/procs.yml"
 				PushAppAndConfirm(app)
 
 				body, err := app.GetBody("/")
@@ -40,7 +40,7 @@ var _ = Describe("CF PHP Buildpack", func() {
 			if !cutlass.Cached {
 				app = cutlass.New(filepath.Join(testdata, "cake_remote_deps"))
 				app.SetEnv("COMPOSER_GITHUB_OAUTH_TOKEN", os.Getenv("COMPOSER_GITHUB_OAUTH_TOKEN"))
-				app.StartCommand = "$HOME/bin/cake migrations migrate && procmgr /home/vcap/deps/org.cloudfoundry.php-web/php-web/procs.yml"
+				app.StartCommand = "$HOME/bin/cake migrations migrate && procmgr /home/vcap/deps/paketo-buildpacks_php-web/php-web/procs.yml"
 				PushAppAndConfirm(app)
 
 				body, err := app.GetBody("/")
