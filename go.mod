@@ -7,7 +7,7 @@ require (
 	github.com/cloudfoundry/libbuildpack v0.0.0-20200402154549-ad17d07f4ea1
 	github.com/cloudfoundry/libcfbuildpack v1.91.23
 	github.com/onsi/ginkgo v1.12.0
-	github.com/onsi/gomega v1.9.0
+	github.com/onsi/gomega v1.10.0
 	github.com/sclevine/agouti v3.0.0+incompatible
 	gopkg.in/yaml.v2 v2.2.8
 )
