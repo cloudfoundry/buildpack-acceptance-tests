@@ -9,7 +9,7 @@ require (
 	github.com/onsi/ginkgo v1.12.0
 	github.com/onsi/gomega v1.10.0
 	github.com/sclevine/agouti v3.0.0+incompatible
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.3.0
 )
 
 go 1.13
