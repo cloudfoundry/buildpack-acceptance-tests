@@ -8,7 +8,7 @@ RUN cd /data/docs-builder \
   && make website LANGS="en es fr ja pt ru" SOURCE=/data/src DEST=/data/website/
 
 # Build a small nginx container with just the static site in it.
-FROM nginx:1.15-alpine
+FROM nginx:1.21-alpine
 
 COPY --from=builder /data/website /data/website
 COPY --from=builder /data/docs-builder/nginx.conf /etc/nginx/conf.d/default.conf
