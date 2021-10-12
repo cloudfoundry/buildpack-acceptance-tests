@@ -6,7 +6,7 @@ require (
 	github.com/cloudfoundry/libbuildpack v0.0.0-20200402154549-ad17d07f4ea1
 	github.com/elazarl/goproxy v0.0.0-20191011121108-aa519ddbe484 // indirect
 	github.com/elazarl/goproxy/ext v0.0.0-20191011121108-aa519ddbe484 // indirect
-	github.com/onsi/ginkgo v1.16.4
+	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.14.0
 	github.com/sclevine/agouti v3.0.0+incompatible
 	gopkg.in/yaml.v2 v2.4.0
